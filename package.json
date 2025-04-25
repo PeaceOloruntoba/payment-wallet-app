@@ -20,5 +20,12 @@
   "main": "server.js",
   "scripts": {
     "test": "npm run test"
+  },
+  "devDependencies": {
+    "bcrypt": "^5.1.1",
+    "cors": "^2.8.5",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.14.0",
+    "nodemon": "^3.1.10"
   }
 }

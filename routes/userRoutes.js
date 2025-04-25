@@ -4,12 +4,12 @@ const {
   loginUser,
   getUserProfile,
 } = require("../controllers/userController");
-const { protect } = require("../middleware/authMiddleware"); // You'll create this
+const { protect } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
 router.post("/register", registerUser);
 router.post("/login", loginUser);
-router.get("/profile", protect, getUserProfile); // Example of a protected route
+router.get("/profile", protect, getUserProfile);
 
 module.exports = router;
