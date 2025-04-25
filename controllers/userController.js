@@ -5,7 +5,7 @@ const bcrypt = require('bcrypt');
 
 // Function to generate JWT
 const generateToken = (id) => {
-  return jwt.sign({ id }, 'your-secret-key', {
+  return jwt.sign({ id }, 'payment', {
     expiresIn: '30d',
   });
 };
