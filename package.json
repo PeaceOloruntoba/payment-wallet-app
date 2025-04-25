@@ -1,0 +1,24 @@
+{
+  "name": "payment-wallet-app",
+  "version": "1.0.0",
+  "description": "sharp",
+  "keywords": [
+    "payment",
+    "wallet"
+  ],
+  "homepage": "https://github.com/PeaceOloruntoba/payment-wallet-app#readme",
+  "bugs": {
+    "url": "https://github.com/PeaceOloruntoba/payment-wallet-app/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PeaceOloruntoba/payment-wallet-app.git"
+  },
+  "license": "MIT",
+  "author": "Peace Oloruntoba",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "test": "npm run test"
+  }
+}
