@@ -1,112 +1,108 @@
-import Wallet from "../models/Wallet.js";
 import User from "../models/User.js";
-import VirtualCard from "../models/VirtualCard.js";
+import Transaction from "../models/Transaction.js";
 
-export const getUserWallet = async (req, res) => {
-  try {
-    const wallet = await Wallet.findOne({ userId: req.user._id });
-    if (!wallet) {
-      return res.status(404).json({ message: "Wallet not found" });
-    }
-    res.json(wallet);
-  } catch (error) {
-    res.status(500).json({ message: `Error: ${error.message}` });
-  }
+// @desc    Get My Wallet Balance
+// @route   GET /api/wallet/balance
+// @access  Private
+export const getBalance = async (req, res) => {
+  const user = await User.findById(req.user._id);
+  res.json({ walletBalance: user.walletBalance, currency: user.currency });
 };
 
-export const createWallet = async (req, res) => {
-  const userId = req.user._id;
+// @desc    Deposit Money into Wallet
+// @route   POST /api/wallet/deposit
+// @access  Private
+export const deposit = async (req, res) => {
+  const { amount } = req.body;
 
-  try {
-    // Check if a wallet already exists for the user
-    const existingWallet = await Wallet.findOne({ userId });
-    if (existingWallet) {
-      return res
-        .status(400)
-        .json({ message: "Wallet already exists for this user" });
-    }
-    const wallet = await Wallet.create({ userId });
-    res.status(201).json(wallet);
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: `Error creating wallet: ${error.message}` });
+  if (!amount || amount <= 0) {
+    return res.status(400).json({ message: "Invalid deposit amount" });
   }
+
+  const user = await User.findById(req.user._id);
+
+  user.walletBalance += amount;
+  await user.save();
+
+  await Transaction.create({
+    type: "deposit",
+    amount,
+    receiver: user._id,
+  });
+
+  res.json({
+    message: "Deposit successful",
+    walletBalance: user.walletBalance,
+  });
 };
 
-export const transferFunds = async (req, res) => {
-  const { receiverEmail, amount } = req.body;
-  const senderUserId = req.user._id;
+// @desc    Withdraw Money from Wallet
+// @route   POST /api/wallet/withdraw
+// @access  Private
+export const withdraw = async (req, res) => {
+  const { amount } = req.body;
 
-  try {
-    // Find sender and receiver wallets
-    const senderWallet = await Wallet.findOne({ userId: senderUserId });
-    const receiverUser = await User.findOne({ email: receiverEmail }); // Find user by email
-    if (!receiverUser) {
-      return res.status(404).json({ message: "Receiver user not found" });
-    }
-    const receiverWallet = await Wallet.findOne({ userId: receiverUser._id });
-
-    if (!senderWallet || !receiverWallet) {
-      return res.status(404).json({ message: "Wallet not found" });
-    }
-
-    if (senderWallet.balance < amount) {
-      return res.status(400).json({ message: "Insufficient funds" });
-    }
-
-    // Perform the transfer
-    senderWallet.balance -= amount;
-    receiverWallet.balance += amount;
-
-    await senderWallet.save();
-    await receiverWallet.save();
-
-    res.json({ message: "Funds transferred successfully" });
-  } catch (error) {
-    res.status(500).json({ message: `Error: ${error.message}` });
+  if (!amount || amount <= 0) {
+    return res.status(400).json({ message: "Invalid withdraw amount" });
   }
+
+  const user = await User.findById(req.user._id);
+
+  if (user.walletBalance < amount) {
+    return res.status(400).json({ message: "Insufficient balance" });
+  }
+
+  user.walletBalance -= amount;
+  await user.save();
+
+  await Transaction.create({
+    type: "withdraw",
+    amount,
+    sender: user._id,
+  });
+
+  res.json({
+    message: "Withdraw successful",
+    walletBalance: user.walletBalance,
+  });
 };
 
-export const createVirtualCard = async (req, res) => {
-  const walletId = req.user.walletId; // Get wallet ID from the user
+// @desc    Transfer Money to another User by Account Number
+// @route   POST /api/wallet/transfer
+// @access  Private
+export const transfer = async (req, res) => {
+  const { accountNumber, amount } = req.body;
 
-  try {
-    // Check if a virtual card already exists for this wallet
-    const existingCard = await VirtualCard.findOne({ walletId });
-    if (existingCard) {
-      return res
-        .status(400)
-        .json({ message: "Virtual card already exists for this wallet" });
-    }
-    // In a real application, you would generate a unique card number, expiry date, and CVV
-    const newCard = await VirtualCard.create({
-      walletId,
-      cardNumber: "**** **** **** " + Math.floor(1000 + Math.random() * 9000), // Mocked
-      expiryDate: "12/28", // Mocked
-      cvv: Math.floor(100 + Math.random() * 900), // Mocked
-    });
-    res.status(201).json(newCard);
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: `Error creating virtual card: ${error.message}` });
+  if (!accountNumber || !amount || amount <= 0) {
+    return res.status(400).json({ message: "Invalid transfer details" });
   }
-};
 
-export const getUserVirtualCard = async (req, res) => {
-  const walletId = req.user.walletId;
-  try {
-    const card = await VirtualCard.findOne({ walletId });
-    if (!card) {
-      return res
-        .status(404)
-        .json({ message: "Virtual card not found for this wallet" });
-    }
-    res.json(card);
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: `Error retrieving virtual card: ${error.message}` });
+  const sender = await User.findById(req.user._id);
+  const receiver = await User.findOne({ accountNumber });
+
+  if (!receiver) {
+    return res.status(404).json({ message: "Receiver not found" });
   }
+
+  if (sender.walletBalance < amount) {
+    return res.status(400).json({ message: "Insufficient balance" });
+  }
+
+  sender.walletBalance -= amount;
+  receiver.walletBalance += amount;
+
+  await sender.save();
+  await receiver.save();
+
+  await Transaction.create({
+    type: "transfer",
+    amount,
+    sender: sender._id,
+    receiver: receiver._id,
+  });
+
+  res.json({
+    message: "Transfer successful",
+    senderBalance: sender.walletBalance,
+  });
 };
