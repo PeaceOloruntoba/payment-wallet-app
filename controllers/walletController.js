@@ -72,41 +72,43 @@ export const withdraw = async (req, res) => {
 // @desc    Transfer Money to another User by Account Number
 // @route   POST /api/wallet/transfer
 // @access  Private
-export const transfer = async (req, res) => {
-  const { accountNumber, amount } = req.body;
+export const transferMoney = async (req, res) => {
+  const { recipientAccountId, amount } = req.body;
 
-  if (!accountNumber || !amount || amount <= 0) {
-    return res.status(400).json({ message: "Invalid transfer details" });
+  if (!recipientAccountId || !amount || amount <= 0) {
+    return res.status(400).json({ message: "Invalid transfer data" });
   }
 
-  const sender = await User.findById(req.user._id);
-  const receiver = await User.findOne({ accountNumber });
+  try {
+    const sender = await User.findById(req.user._id);
 
-  if (!receiver) {
-    return res.status(404).json({ message: "Receiver not found" });
+    if (!sender) {
+      return res.status(404).json({ message: "Sender not found" });
+    }
+
+    if (sender.walletBalance < amount) {
+      return res.status(400).json({ message: "Insufficient balance" });
+    }
+
+    const recipient = await User.findOne({ accountNumber: recipientAccountId });
+
+    if (!recipient) {
+      return res.status(404).json({ message: "Recipient not found" });
+    }
+
+    // Deduct from sender
+    sender.walletBalance -= amount;
+    await sender.save();
+
+    // Add to recipient
+    recipient.walletBalance += amount;
+    await recipient.save();
+
+    res.status(200).json({ message: "Transfer successful" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Transfer failed" });
   }
-
-  if (sender.walletBalance < amount) {
-    return res.status(400).json({ message: "Insufficient balance" });
-  }
-
-  sender.walletBalance -= amount;
-  receiver.walletBalance += amount;
-
-  await sender.save();
-  await receiver.save();
-
-  await Transaction.create({
-    type: "transfer",
-    amount,
-    sender: sender._id,
-    receiver: receiver._id,
-  });
-
-  res.json({
-    message: "Transfer successful",
-    senderBalance: sender.walletBalance,
-  });
 };
 
 // @desc    Initiate Local Bank Deposit
