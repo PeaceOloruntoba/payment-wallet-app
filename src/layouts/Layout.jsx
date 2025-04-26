@@ -1,5 +1,4 @@
 import React from "react";
-import { cn } from "../lib/utils";
 import {
   Home,
   CreditCard,
@@ -17,50 +16,45 @@ const Layout = ({ children }) => {
         <nav className="space-y-2">
           <a
             href="/dashboard"
-            className={cn(
-              "block px-4 py-2 rounded-md transition-colors hover:bg-gray-100 w-full text-left",
-              "flex items-center gap-2"
-            )}
+            className={
+              "block px-4 py-2 rounded-md transition-colors hover:bg-gray-100 w-full text-left flex items-center gap-2"
+            }
           >
             <Home className="w-4 h-4" />
             Dashboard
           </a>
           <a
             href="/wallet/virtual-card"
-            className={cn(
-              "block px-4 py-2 rounded-md transition-colors hover:bg-gray-100 w-full text-left",
-              "flex items-center gap-2"
-            )}
+            className={
+              "block px-4 py-2 rounded-md transition-colors hover:bg-gray-100 w-full text-left flex items-center gap-2"
+            }
           >
             <CreditCard className="w-4 h-4" />
             Virtual Card
           </a>
           <a
             href="/wallet/transfer"
-            className={cn(
-              "block px-4 py-2 rounded-md transition-colors hover:bg-gray-100 w-full text-left",
-              "flex items-center gap-2"
-            )}
+            className={
+              "block px-4 py-2 rounded-md transition-colors hover:bg-gray-100 w-full text-left flex items-center gap-2"
+            }
           >
             <ArrowRightLeft className="w-4 h-4" />
             Transfer
           </a>
           <a
             href="/wallet/withdraw"
-            className={cn(
-              "block px-4 py-2 rounded-md transition-colors hover:bg-gray-100 w-full text-left",
-              "flex items-center gap-2"
-            )}
+            className={
+              "block px-4 py-2 rounded-md transition-colors hover:bg-gray-100 w-full text-left flex items-center gap-2"
+            }
           >
             <ArrowLeftRight className="w-4 h-4" />
             Withdraw
           </a>
           <a
             href="/wallet/deposit"
-            className={cn(
-              "block px-4 py-2 rounded-md transition-colors hover:bg-gray-100 w-full text-left",
-              "flex items-center gap-2"
-            )}
+            className={
+              "block px-4 py-2 rounded-md transition-colors hover:bg-gray-100 w-full text-left flex items-center gap-2"
+            }
           >
             <PlusCircle className="w-4 h-4" />
             Deposit
