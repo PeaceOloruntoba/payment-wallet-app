@@ -416,3 +416,91 @@ const handlePayoutFailed = async (data) => {
     await transaction.updateOne({status: "failed", rapydResponse: data});
      console.log(`Payout Failed for transaction: ${transactionId}`);
 }
+
+// @desc    Create a virtual card for a user's wallet
+// @route   POST /api/wallet/virtual-card
+// @access  Private
+export const createVirtualCard = async (req, res) => {
+  try {
+    const user = await User.findById(req.user._id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    if (!user.rapydWalletId) {
+      return res.status(400).json({ message: "User does not have a Rapyd wallet" });
+    }
+
+    // 1. Create the virtual card using Rapyd API
+    const cardResponse = await rapydRequest("post", "/v1/cards/virtual", {
+      wallet: user.rapydWalletId,
+      currency: user.currency, // Use user's currency
+      metadata: {
+        userId: user._id.toString(), // Store Mongoose ID
+      },
+    });
+
+    if (cardResponse.status?.status !== "SUCCESS") {
+      throw new Error(
+        cardResponse.status?.error_message ||
+          "Failed to create virtual card"
+      );
+    }
+
+    const virtualCard = cardResponse.data;
+    const cardId = virtualCard.id;
+
+    // 2. Store the cardId in the User model
+    user.virtualCardId = cardId; // Store the Rapyd card ID
+    await user.save();
+
+    // 3. Return the virtual card details to the client.
+    res.status(201).json({
+      message: "Virtual card created successfully",
+      cardId: cardId, // Return the Rapyd card ID.
+    });
+  } catch (error: any) {
+    console.error("Create Virtual Card Error:", error);
+    res.status(500).json({
+      message: error.message || "Failed to create virtual card",
+    });
+  }
+};
+
+// @desc    Get a virtual card details.  This should be called only when you need to display the card number, CVV, etc. to the user, and you should follow Rapyd's security guidelines.
+// @route   GET /api/wallet/virtual-card/:cardId
+// @access  Private
+export const getVirtualCardDetails = async (req, res) => {
+  const { cardId } = req.params;
+
+  try {
+    const user = await User.findById(req.user._id);
+     if (!user) {
+            return res.status(404).json({ message: "User not found" });
+     }
+
+    // 1.  Call Rapyd to get the card details.
+    const cardDetailsResponse = await rapydRequest("get", `/v1/cards/virtual/${cardId}`);
+
+    if (cardDetailsResponse.status?.status !== "SUCCESS") {
+      throw new Error(
+        cardDetailsResponse.status?.error_message ||
+          "Failed to retrieve virtual card details"
+      );
+    }
+    const cardDetails = cardDetailsResponse.data;
+
+    // 2.  Return the card details.  Be very careful how you handle this data.
+    res.status(200).json({
+      cardNumber: cardDetails.number,
+      expiryDate: cardDetails.expiry_date,
+      cvv: cardDetails.cvv,
+    });
+  } catch (error: any) {
+    console.error("Get Virtual Card Details Error", error);
+    res.status(500).json({
+      message: error.message || "Failed to retrieve virtual card details",
+    });
+  }
+};
