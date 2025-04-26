@@ -1,5 +1,6 @@
 import User from "../models/User.js";
 import Transaction from "../models/Transaction.js";
+import { rapydRequest } from "../utils/rapyd.js";
 
 // @desc    Get My Wallet Balance
 // @route   GET /api/wallet/balance
@@ -105,4 +106,35 @@ export const transfer = async (req, res) => {
     message: "Transfer successful",
     senderBalance: sender.walletBalance,
   });
+};
+
+// @desc    Initiate Local Bank Deposit
+// @route   POST /api/wallet/deposit/start
+// @access  Private
+export const startDeposit = async (req, res) => {
+  const { amount, currency } = req.body;
+
+  if (!amount || amount <= 0 || !currency) {
+    return res.status(400).json({ message: "Invalid deposit request" });
+  }
+
+  try {
+    const user = await User.findById(req.user._id);
+
+    const response = await rapydRequest("post", "/v1/checkout", {
+      amount,
+      country: user.country, // user's saved country like 'NG' for Nigeria
+      currency,
+      complete_checkout_url: "https://yourfrontend.com/deposit-success", // after successful payment
+      cancel_checkout_url: "https://yourfrontend.com/deposit-cancel", // if cancelled
+      error_checkout_url: "https://yourfrontend.com/deposit-error", // if error
+      merchant_reference_id: user._id.toString(),
+      language: "en",
+    });
+
+    return res.json({ checkout: response.data });
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).json({ message: "Failed to start deposit" });
+  }
 };
