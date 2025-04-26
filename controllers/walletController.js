@@ -1,6 +1,6 @@
-import Wallet from "../models/Wallet";
-import User from "../models/User";
-import VirtualCard from "../models/VirtualCard";
+import Wallet from "../models/Wallet.js";
+import User from "../models/User.js";
+import VirtualCard from "../models/VirtualCard.js";
 
 export const getUserWallet = async (req, res) => {
   try {
