@@ -1,5 +1,4 @@
 import React from "react";
-import { cn } from "@/lib/utils";
 
 const WelcomePage = () => {
   return (
@@ -11,17 +10,17 @@ const WelcomePage = () => {
       <div className="flex gap-4">
         <a
           href="/register"
-          className={cn(
+          className={
             "px-6 py-3 rounded-md bg-blue-500 text-white hover:bg-blue-600 transition-colors"
-          )}
+          }
         >
           Register
         </a>
         <a
           href="/login"
-          className={cn(
+          className={
             "px-6 py-3 rounded-md bg-green-500 text-white hover:bg-green-600 transition-colors"
-          )}
+          }
         >
           Login
         </a>
