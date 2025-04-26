@@ -1,16 +1,13 @@
-import mongoose from "mongoose";
+const mongoose = require("mongoose");
 
 const connectDB = async () => {
   try {
-    await mongoose.connect("mongodb://localhost:27017/walletDB", {
-      // Replace 'walletDB'
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(process.env.MONGO_URI);
     console.log("MongoDB Connected");
   } catch (error) {
-    console.error(`Error: ${error.message}`);
+    console.error(error.message);
     process.exit(1);
   }
 };
-export default connectDB;
+
+module.exports = connectDB;
