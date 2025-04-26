@@ -1,6 +1,7 @@
 import React, { Suspense, lazy } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router";
 import { Toaster } from "sonner";
+import Layout from "./layouts/Layout";
 
 // Define your routes
 const routes = [
