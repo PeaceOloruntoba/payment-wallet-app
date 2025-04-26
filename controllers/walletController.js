@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import User from "../models/User.js";
 import Transaction from "../models/Transaction.js";
 import { rapydRequest } from "../utils/rapyd.js";
@@ -125,9 +126,11 @@ export const startDeposit = async (req, res) => {
       amount,
       country: user.country, // user's saved country like 'NG' for Nigeria
       currency,
-      complete_checkout_url: "https://yourfrontend.com/deposit-success", // after successful payment
-      cancel_checkout_url: "https://yourfrontend.com/deposit-cancel", // if cancelled
-      error_checkout_url: "https://yourfrontend.com/deposit-error", // if error
+      complete_checkout_url:
+        "https://payment-wallet-app.vercel.app/deposit/success", // after successful payment
+      cancel_checkout_url:
+        "https://payment-wallet-app.vercel.app/deposit/cancel", // if cancelled
+      error_checkout_url: "https://payment-wallet-app.vercel.app/deposit/error", // if error
       merchant_reference_id: user._id.toString(),
       language: "en",
     });
@@ -136,5 +139,56 @@ export const startDeposit = async (req, res) => {
   } catch (error) {
     console.error(error.message);
     res.status(500).json({ message: "Failed to start deposit" });
+  }
+};
+
+// @desc   Handle Rapyd Webhooks
+// @route  POST /api/wallet/webhook
+export const rapydWebhook = async (req, res) => {
+  const secret = process.env.RAPYD_SECRET_KEY;
+
+  const signature = req.headers["signature"];
+  const salt = req.headers["salt"];
+  const timestamp = req.headers["timestamp"];
+
+  const rawBody = req.body.toString("utf8");
+
+  // Create the string Rapyd expects
+  const toSign = `${req.method.toLowerCase()}${
+    req.originalUrl
+  }${salt}${timestamp}${process.env.RAPYD_ACCESS_KEY}${secret}${rawBody}`;
+  const expectedSignature = Buffer.from(
+    crypto.createHmac("sha256", secret).update(toSign).digest("hex")
+  ).toString("base64");
+
+  if (expectedSignature !== signature) {
+    console.error("Invalid webhook signature!");
+    return res.status(403).send("Invalid signature");
+  }
+
+  const event = JSON.parse(rawBody);
+
+  if (event.type === "PAYMENT_COMPLETED") {
+    try {
+      const { merchant_reference_id, amount, currency } = event.data;
+
+      const user = await User.findById(merchant_reference_id);
+      if (!user) {
+        console.error("User not found for webhook");
+        return res.status(404).send("User not found");
+      }
+
+      // Update wallet
+      user.walletBalance += amount;
+      await user.save();
+
+      console.log(`Wallet funded for user ${user._id}: +${amount} ${currency}`);
+      res.status(200).send("Wallet funded");
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Webhook handling failed");
+    }
+  } else {
+    res.status(200).send("Event ignored");
   }
 };
