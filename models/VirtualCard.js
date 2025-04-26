@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const { default: mongoose } = require("mongoose");
 
 const virtualCardSchema = new mongoose.Schema({
   walletId: {
@@ -13,4 +13,4 @@ const virtualCardSchema = new mongoose.Schema({
 });
 
 const VirtualCard = mongoose.model("VirtualCard", virtualCardSchema);
-module.exports = VirtualCard;
+export default VirtualCard;
