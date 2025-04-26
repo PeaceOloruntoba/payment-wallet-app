@@ -11,7 +11,6 @@ const generateToken = (id) => {
 // @desc    Register a new user
 // @route   POST /api/auth/register
 // @access  Public
-
 export const register = async (req, res) => {
   const { name, email, phone, password, currency, country } /* Added country */ =
     req.body;
@@ -93,7 +92,7 @@ export const register = async (req, res) => {
       token: generateToken(user._id),
       rapydWalletId: user.rapydWalletId,
     });
-  } catch (error: any) {
+  } catch (error) {
     // 4. Handle Errors
     console.error("Registration Error:", error);
     res.status(500).json({ message: error.message || "Registration failed" });
