@@ -1,12 +1,12 @@
-const express = require("express");
-const {
-  getUserWallet,
-  createWallet,
-  transferFunds,
+import express from "express";
+import { protect } from "../middleware/authMiddleware.js";
+import {
   createVirtualCard,
+  createWallet,
   getUserVirtualCard,
-} = require("../controllers/walletController");
-const { protect } = require("../middleware/authMiddleware");
+  getUserWallet,
+  transferFunds,
+} from "../controllers/walletController.js";
 
 const router = express.Router();
 
