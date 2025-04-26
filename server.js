@@ -1,8 +1,8 @@
-const express = require("express");
-const connectDB = require("./config/db");
-const userRoutes = require("./routes/userRoutes");
-const walletRoutes = require("./routes/walletRoutes");
-const cors = require("cors");
+import userRoutes from "./routes/userRoutes.js";
+import walletRoutes from "./routes/walletRoutes.js";
+import connectDB from "./config/db.js";
+import express from "express";
+import cors from "cors";
 
 const app = express();
 

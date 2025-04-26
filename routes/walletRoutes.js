@@ -16,4 +16,4 @@ router.post("/transfer", protect, transferFunds);
 router.post("/card", protect, createVirtualCard);
 router.get("/card", protect, getUserVirtualCard);
 
-module.exports = router;
+export default router;
