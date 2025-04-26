@@ -149,7 +149,7 @@ export const withdraw = async (req, res) => {
 
         res.status(200).json({ message: "Withdrawal initiated successfully", payoutId: payoutResponse.data.id }); // Return payout ID
 
-    } catch (error: any) {
+    } catch (error) {
         console.error("Withdrawal Error:", error);
         res.status(500).json({ message: error.message || "Withdrawal failed" });
     }
@@ -246,7 +246,7 @@ export const transferMoney = async (req, res) => {
     });
 
     res.status(200).json({ message: "Transfer successful" });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Transfer Error:", error);
     res.status(500).json({ message: error.message || "Transfer failed" });
   }
@@ -340,7 +340,7 @@ export const rapydWebhook = async (req, res) => {
 };
 
 // --- Helper Functions ---
-const handlePaymentCompleted = async (data: any) => {
+const handlePaymentCompleted = async (data) => {
   const { merchant_reference_id, amount, currency } = data;
 
   const user = await User.findById(merchant_reference_id);
@@ -362,7 +362,7 @@ const handlePaymentCompleted = async (data: any) => {
   console.log(`Wallet funded for user ${user._id}: +${amount} ${currency}`);
 };
 
-const handleTransferCompleted = async (data: any) => {
+const handleTransferCompleted = async (data) => {
   const { metadata } = data;
   const { transactionId } = metadata;
 
@@ -376,7 +376,7 @@ const handleTransferCompleted = async (data: any) => {
   console.log(`Transfer completed for transaction: ${transactionId}`);
 };
 
-const handleTransferFailed = async (data: any) => {
+const handleTransferFailed = async (data) => {
   const { metadata } = data;
   const { transactionId } = metadata;
 
@@ -390,7 +390,7 @@ const handleTransferFailed = async (data: any) => {
   console.log(`Transfer failed for transaction: ${transactionId}`);
 };
 
-const handlePayoutCompleted = async (data: any) => {
+const handlePayoutCompleted = async (data) => {
     const { metadata } = data;
     const { transactionId } = metadata;
 
@@ -403,7 +403,7 @@ const handlePayoutCompleted = async (data: any) => {
     console.log(`Payout Completed for transaction: ${transactionId}`);
 }
 
-const handlePayoutFailed = async (data: any) => {
+const handlePayoutFailed = async (data) => {
     const { metadata } = data;
     const { transactionId } = metadata;
 
