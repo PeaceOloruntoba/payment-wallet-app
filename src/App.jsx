@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Route, Routes } from "react-router";
 import { Toaster } from "sonner";
 import RootLayout from "./layouts/RootLayout";
 import Home from "./pages/Home";
+import WalletApp from "./pages/WalletApp";
 
 export default function App() {
   return (
@@ -19,6 +20,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<RootLayout />}>
               <Route path="" element={<Home />} />
+              <Route path="/wallet" element={<WalletApp />} />
             </Route>
           </Routes>
         </Router>
