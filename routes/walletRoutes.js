@@ -4,9 +4,10 @@ import {
   deposit,
   withdraw,
   transfer,
+  startDeposit,
+  rapydWebhook,
 } from "../controllers/walletController.js";
 import { protect } from "../middlewares/authMiddleware.js";
-import { startDeposit } from "../controllers/walletController.js";
 
 const router = express.Router();
 
@@ -15,5 +16,7 @@ router.post("/deposit", protect, deposit);
 router.post("/deposit/start", protect, startDeposit);
 router.post("/withdraw", protect, withdraw);
 router.post("/transfer", protect, transfer);
+
+router.post("/webhook", express.raw({ type: "*/*" }), rapydWebhook);
 
 export default router;
