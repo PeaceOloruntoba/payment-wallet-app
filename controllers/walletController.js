@@ -1,8 +1,8 @@
-const Wallet = require("../models/Wallet");
-const User = require("../models/User");
-const VirtualCard = require("../models/VirtualCard");
+import Wallet from "../models/Wallet";
+import User from "../models/User";
+import VirtualCard from "../models/VirtualCard";
 
-const getUserWallet = async (req, res) => {
+export const getUserWallet = async (req, res) => {
   try {
     const wallet = await Wallet.findOne({ userId: req.user._id });
     if (!wallet) {
@@ -14,7 +14,7 @@ const getUserWallet = async (req, res) => {
   }
 };
 
-const createWallet = async (req, res) => {
+export const createWallet = async (req, res) => {
   const userId = req.user._id;
 
   try {
@@ -34,7 +34,7 @@ const createWallet = async (req, res) => {
   }
 };
 
-const transferFunds = async (req, res) => {
+export const transferFunds = async (req, res) => {
   const { receiverEmail, amount } = req.body;
   const senderUserId = req.user._id;
 
@@ -68,7 +68,7 @@ const transferFunds = async (req, res) => {
   }
 };
 
-const createVirtualCard = async (req, res) => {
+export const createVirtualCard = async (req, res) => {
   const walletId = req.user.walletId; // Get wallet ID from the user
 
   try {
@@ -94,7 +94,7 @@ const createVirtualCard = async (req, res) => {
   }
 };
 
-const getUserVirtualCard = async (req, res) => {
+export const getUserVirtualCard = async (req, res) => {
   const walletId = req.user.walletId;
   try {
     const card = await VirtualCard.findOne({ walletId });
@@ -109,12 +109,4 @@ const getUserVirtualCard = async (req, res) => {
       .status(500)
       .json({ message: `Error retrieving virtual card: ${error.message}` });
   }
-};
-
-module.exports = {
-  getUserWallet,
-  createWallet,
-  transferFunds,
-  createVirtualCard,
-  getUserVirtualCard,
 };
