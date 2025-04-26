@@ -12,33 +12,6 @@ export const getBalance = async (req, res) => {
   res.json({ walletBalance: user.walletBalance, currency: user.currency });
 };
 
-// @desc    Deposit Money into Wallet
-// @route   POST /api/wallet/deposit
-// @access  Private
-export const deposit = async (req, res) => {
-  const { amount } = req.body;
-
-  if (!amount || amount <= 0) {
-    return res.status(400).json({ message: "Invalid deposit amount" });
-  }
-
-  const user = await User.findById(req.user._id);
-
-  user.walletBalance += amount;
-  await user.save();
-
-  await Transaction.create({
-    type: "deposit",
-    amount,
-    receiver: user._id,
-  });
-
-  res.json({
-    message: "Deposit successful",
-    walletBalance: user.walletBalance,
-  });
-};
-
 // @desc    Withdraw Money from Wallet to Local Bank
 // @route   POST /api/wallet/withdraw
 // @access  Private
