@@ -460,7 +460,7 @@ export const createVirtualCard = async (req, res) => {
       message: "Virtual card created successfully",
       cardId: cardId, // Return the Rapyd card ID.
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Create Virtual Card Error:", error);
     res.status(500).json({
       message: error.message || "Failed to create virtual card",
@@ -497,7 +497,7 @@ export const getVirtualCardDetails = async (req, res) => {
       expiryDate: cardDetails.expiry_date,
       cvv: cardDetails.cvv,
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error("Get Virtual Card Details Error", error);
     res.status(500).json({
       message: error.message || "Failed to retrieve virtual card details",
